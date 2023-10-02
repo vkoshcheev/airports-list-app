@@ -1,0 +1,27 @@
+.itemContainer {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  border-bottom: 1px dashed white;
+}
+
+.itemContainer:last-child {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  border-bottom: 0;
+}
+
+.description {
+  padding: 4px 10px;
+  font-size: calc(10px + 2vh);
+  color: white;
+  text-align: start;
+  align-self: center;
+  height: auto;
+}
+
+.coordinates {
+  padding: 4px 10px;
+  color: white;
+  text-align: start;
+  border-left: 1px dashed white;
+}

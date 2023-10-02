@@ -1,0 +1,14 @@
+.list {
+  margin-bottom: 10px;
+  background-color: #404d68;
+  width: 100%;
+  flex: 1;
+  border-radius: 8px;
+  border: 1px solid white;
+}
+
+.listMessage {
+  margin-top: 10px;
+  font-size: calc(10px + 2vh);
+  color: white;
+}

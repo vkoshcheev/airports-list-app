@@ -1,0 +1,22 @@
+.itemContainer {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  border-bottom: 1px solid white;
+}
+
+.description {
+  padding: 4px 10px;
+  font-size: calc(10px + 2vh);
+  color: white;
+  text-align: start;
+  align-self: center;
+  height: auto;
+}
+
+.coordinates {
+  font-size: calc(10px + 2vh);
+  padding: 4px 10px;
+  color: white;
+  text-align: center;
+  border-left: 1px solid white;
+}

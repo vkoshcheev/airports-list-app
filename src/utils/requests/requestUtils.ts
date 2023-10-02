@@ -9,7 +9,6 @@ export enum METHOD {
 }
 
 export const setAxiosInterceptor = () => {
-  // Request interceptors for API calls
   axios.interceptors.request.use(
     (config) => {
       config.headers['X-RapidAPI-Key'] =

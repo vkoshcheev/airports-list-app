@@ -12,7 +12,6 @@ export async function airportsListRequest(country: string = 'US') {
 
   const response = await axiosRequest({ requestConfig, dataDescription });
   const data = response?.data as AirportData[];
-  console.log(`${dataDescription}:\r\n${JSON.stringify(data)}`);
 
   return data;
 }

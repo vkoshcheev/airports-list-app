@@ -4,9 +4,13 @@ import AirportsList from './components/AirportsList/AirportsList';
 import { airportsListByCodeRequest } from './utils/requests/airportsListByCodeRequest';
 import { airportsListByNameRequest } from './utils/requests/airportsListByNameRequest';
 import { airportsListRequest } from './utils/requests/airportsListRequest';
-import { setAxiosInterceptor } from './utils/requests/requestUtils';
 import { AirportData } from './utils/types';
 import useDebounce from './utils/useDebounce';
+
+// notes:
+// server returns 400 error if user attempts to search airport by name/code and there are no matches;
+// it is uncertain whether it's intended behavior;
+// usually the server is supposed to return empty list in such cases, not error.
 
 function App() {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,18 +19,24 @@ function App() {
     AirportData[]
   >([]);
   const [searchText, setSearchText] = useState('');
+  const [errorText, setErrorText] = useState('');
 
   useEffect(() => {
-    setAxiosInterceptor();
     getInitialAirportsList();
   }, []);
 
   const getInitialAirportsList = async () => {
     setIsLoading(true);
-    const initialList = await airportsListRequest();
-    setAirportsList(initialList);
-    setFilteredAirportsList(initialList);
-    setIsLoading(false);
+    try {
+      const initialList = await airportsListRequest();
+      setAirportsList(initialList);
+      setFilteredAirportsList(initialList);
+    } catch (e: any) {
+      const errorMessage = e.message || e;
+      setErrorText(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const onSearch = (searchInput: string) => {
@@ -35,9 +45,9 @@ function App() {
       return;
     }
 
-    const filteredList = airportsList.filter((airportData: AirportData) => {
-      const iataFits = airportData.iata.includes(searchInput);
-      const nameFits = airportData.name.includes(searchInput);
+    const filteredList = airportsList.filter(({ iata, name }: AirportData) => {
+      const iataFits = iata.includes(searchInput);
+      const nameFits = name.includes(searchInput);
 
       if (iataFits || nameFits) return true;
       return false;
@@ -54,24 +64,28 @@ function App() {
   const onSearchRequestAsync = async (searchInput: string) => {
     setIsLoading(true);
 
-    const airportsListByName = await airportsListByNameRequest({
-      name: searchInput,
-    });
-    if (airportsListByName.length) {
-      setFilteredAirportsList(airportsListByName);
-      setIsLoading(false);
-      return;
-    }
+    try {
+      const airportsListByName = await airportsListByNameRequest({
+        name: searchInput,
+      });
+      if (airportsListByName.length) {
+        setFilteredAirportsList(airportsListByName);
+        return;
+      }
 
-    const airportsListByCode = await airportsListByCodeRequest({
-      iata: searchInput,
-    });
-    if (airportsListByCode.length) {
-      setFilteredAirportsList(airportsListByCode);
+      const airportsListByCode = await airportsListByCodeRequest({
+        iata: searchInput,
+      });
+      if (airportsListByCode.length) {
+        setFilteredAirportsList(airportsListByCode);
+        return;
+      }
+    } catch (e: any) {
+      const errorMessage = e.message || e;
+      setErrorText(errorMessage);
+    } finally {
       setIsLoading(false);
-      return;
     }
-
     setFilteredAirportsList([]);
   };
 
@@ -81,6 +95,7 @@ function App() {
       return;
     }
 
+    if (errorText) setErrorText('');
     setSearchText(newSearchText);
     debounceSearch(newSearchText);
   };
@@ -88,9 +103,6 @@ function App() {
   const searchPlaceholder = 'Please enter airport name or code';
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        Please enter airport name or code:
-      </header>
       <input
         name="searchInput"
         className={styles.searchInput}
@@ -99,7 +111,7 @@ function App() {
         placeholder={searchPlaceholder}
         onChange={(e) => onChange(e.target.value)}
       />
-      <AirportsList airportsList={filteredAirportsList} isLoading={isLoading} />
+      <AirportsList airportsList={filteredAirportsList} isLoading={isLoading} errorText={errorText} />
     </div>
   );
 }

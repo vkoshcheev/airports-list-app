@@ -16,9 +16,6 @@ export async function airportsListByCodeRequest({
     ...endpoints.getAirportsListByCode(iata, country),
   };
 
-  const response = await axiosRequest({ requestConfig, dataDescription });
-  const data = response?.data as AirportData[];
-  console.log(`${dataDescription}:\r\n${JSON.stringify(data)}`);
-
-  return data;
+  const responseData: AirportData[] = await axiosRequest({ requestConfig, dataDescription });
+  return responseData;
 }

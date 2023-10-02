@@ -8,20 +8,8 @@ export enum METHOD {
   PUT = 'PUT',
 }
 
-export const setAxiosInterceptor = () => {
-  axios.interceptors.request.use(
-    (config) => {
-      config.headers['X-RapidAPI-Key'] =
-        '4b3d50217bmsh5fd912f66f1e90fp112a84jsnd0835779ceda';
-      config.headers['X-RapidAPI-Host'] =
-        'airports-by-api-ninjas.p.rapidapi.com';
-      return config;
-    },
-    (error) => {
-      return Promise.reject(error);
-    }
-  );
-};
+axios.defaults.headers.common['X-RapidAPI-Key'] = '4b3d50217bmsh5fd912f66f1e90fp112a84jsnd0835779ceda';
+axios.defaults.headers.common['X-RapidAPI-Host'] = 'airports-by-api-ninjas.p.rapidapi.com';
 
 export const axiosRequest = async ({
   requestConfig,
@@ -32,24 +20,19 @@ export const axiosRequest = async ({
 }) => {
   const log: string[] = [];
   log.push(`Performing ${dataDescription} request...`);
-  let response;
 
   try {
-    response = await axios(requestConfig);
+    const response = await axios(requestConfig);
+    return response.data;
   } catch (e) {
     const error = e as AxiosError;
-    const errorText = error.message || error;
-    log.push(`Error getting ${dataDescription}: ${errorText}`);
-    response = null;
-  }
-
-  if (!response) {
-    const errorText = `Failed to receive response from server when requesting ${dataDescription}.`;
+    const errorMessage = error.message || error;
+    const errorText = `Error getting ${dataDescription}:\r\n${errorMessage}`;
     log.push(errorText);
+    throw(errorText)
+  } finally {
+    printLog(log);
   }
-
-  printLog(log);
-  return response;
 };
 
 export function printLog(log: string[]) {

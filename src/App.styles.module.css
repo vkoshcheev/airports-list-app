@@ -11,13 +11,8 @@
   text-align: center;
 }
 
-.header {
-  margin-top: 10px;
-  font-size: calc(10px + 2vh);
-  color: white;
-}
-
 .searchInput {
+  margin-top: 10px;
   width: 70%;
   padding: 12px;
   border-radius: 10px;

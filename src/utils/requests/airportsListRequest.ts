@@ -10,8 +10,6 @@ export async function airportsListRequest(country: string = 'US') {
     ...endpoints.getAirportsListByCountry(country),
   };
 
-  const response = await axiosRequest({ requestConfig, dataDescription });
-  const data = response?.data as AirportData[];
-
-  return data;
+  const responseData: AirportData[] = await axiosRequest({ requestConfig, dataDescription });
+  return responseData;
 }

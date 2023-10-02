@@ -4,7 +4,7 @@ import styles from './AirportsListItem.styles.module.css';
 
 const AirportListItem = ({ airportData }: { airportData: AirportData }) => {
   const { name, iata, latitude, longitude } = airportData;
-  const description = `${name} (${iata})`;
+  const description = iata ? `${name} (${iata})`: name;
   const coordinates = `${latitude}, ${longitude}`;
 
   return (

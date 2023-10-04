@@ -39,7 +39,7 @@ function App() {
     }
   };
 
-  const onSearch = (searchInput: string) => {
+  const onSearch = (searchInput: string, airportsList: AirportData[]) => {
     if (!searchInput) {
       setFilteredAirportsList(airportsList);
       return;
@@ -92,13 +92,16 @@ function App() {
 
   const [debounceSearch] = useDebounce(onSearch, 500);
   const onChange = (newSearchText: string) => {
-    if (searchText === newSearchText) {
+    if (errorText) setErrorText('');
+    if (searchText === newSearchText) return;
+
+    if (!newSearchText) {
+      setFilteredAirportsList(airportsList);
       return;
     }
 
-    if (errorText) setErrorText('');
     setSearchText(newSearchText);
-    debounceSearch(newSearchText);
+    debounceSearch(newSearchText, airportsList);
   };
 
   const searchPlaceholder = 'Please enter airport name or code';

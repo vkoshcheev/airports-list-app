@@ -45,9 +45,10 @@ function App() {
       return;
     }
 
+    const input = searchInput.toLowerCase();
     const filteredList = airportsList.filter(({ iata, name }: AirportData) => {
-      const iataFits = iata.includes(searchInput);
-      const nameFits = name.includes(searchInput);
+      const iataFits = iata.toLowerCase().includes(input);
+      const nameFits = name.toLowerCase().includes(input);
 
       if (iataFits || nameFits) return true;
       return false;

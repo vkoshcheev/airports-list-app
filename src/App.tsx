@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './App.styles.module.css';
 import AirportsList from './components/AirportsList/AirportsList';
 import { airportsListByCodeRequest } from './utils/requests/airportsListByCodeRequest';
@@ -62,45 +62,57 @@ function App() {
     onSearchRequestAsync(searchInput);
   };
 
+  const abortController = useRef<AbortController>();
   const onSearchRequestAsync = async (searchInput: string) => {
     setIsLoading(true);
 
+    abortController.current = new AbortController();
     try {
-      const airportsListByName = await airportsListByNameRequest({
-        name: searchInput,
-      });
+      const airportsListByName = await airportsListByNameRequest(
+        {
+          name: searchInput,
+        },
+        { signal: abortController.current.signal }
+      );
       if (airportsListByName.length) {
         setFilteredAirportsList(airportsListByName);
         return;
       }
 
-      const airportsListByCode = await airportsListByCodeRequest({
-        iata: searchInput,
-      });
+      const airportsListByCode = await airportsListByCodeRequest(
+        {
+          iata: searchInput,
+        },
+        { signal: abortController.current.signal }
+      );
       if (airportsListByCode.length) {
         setFilteredAirportsList(airportsListByCode);
         return;
       }
     } catch (e: any) {
       const errorMessage = e.message || e;
-      setErrorText(errorMessage);
+      if (!abortController.current.signal.aborted) {
+        setErrorText(errorMessage);
+        console.log(errorMessage);
+        setFilteredAirportsList([]);
+      }
     } finally {
       setIsLoading(false);
     }
-    setFilteredAirportsList([]);
   };
-
   const [debounceSearch] = useDebounce(onSearch, 500);
   const onChange = (newSearchText: string) => {
     if (errorText) setErrorText('');
     if (searchText === newSearchText) return;
 
+    setSearchText(newSearchText);
+
     if (!newSearchText) {
+      abortController.current?.abort();
       setFilteredAirportsList(airportsList);
       return;
     }
 
-    setSearchText(newSearchText);
     debounceSearch(newSearchText, airportsList);
   };
 
@@ -115,7 +127,11 @@ function App() {
         placeholder={searchPlaceholder}
         onChange={(e) => onChange(e.target.value)}
       />
-      <AirportsList airportsList={filteredAirportsList} isLoading={isLoading} errorText={errorText} />
+      <AirportsList
+        airportsList={filteredAirportsList}
+        isLoading={isLoading}
+        errorText={errorText}
+      />
     </div>
   );
 }
